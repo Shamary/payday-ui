@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
+import { DISPLAY_CURRENCY } from '@/lib/format';
 
 export default function TopupPage() {
   const router = useRouter();
@@ -52,7 +53,7 @@ export default function TopupPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount (JMD) <span className="text-red-500">*</span>
+                Amount ({DISPLAY_CURRENCY}) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -66,7 +67,7 @@ export default function TopupPage() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Amount will be converted to USDT stablecoin
+                Amount will be displayed in USD in your wallet
               </p>
             </div>
 
@@ -92,12 +93,12 @@ export default function TopupPage() {
                 <li>Enter the amount you want to add</li>
                 <li>Select your preferred payment method</li>
                 <li>Complete the payment process</li>
-                <li>USDT will be automatically added to your wallet</li>
+                <li>Funds will be reflected in your wallet balance in USD</li>
               </ol>
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Quick Add</h3>
+              <h3 className="font-semibold mb-2">Quick Add ({DISPLAY_CURRENCY})</h3>
               <div className="grid grid-cols-4 gap-2">
                 {[1000, 5000, 10000, 50000].map((amount) => (
                   <button
@@ -106,7 +107,7 @@ export default function TopupPage() {
                     onClick={() => setFormData({ ...formData, amount: amount.toString() })}
                     className="py-2 px-2 text-sm bg-white border border-gray-300 rounded hover:bg-gray-100"
                   >
-                    JMD {amount.toLocaleString()}
+                    {DISPLAY_CURRENCY} {amount.toLocaleString()}
                   </button>
                 ))}
               </div>
