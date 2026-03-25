@@ -19,14 +19,20 @@ interface Transaction {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [wallet, setWallet] = useState<any>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Wait for auth to be initialized
+    if (!authLoading && user) {
+      fetchData();
+    } else if (!authLoading && !user) {
+      // No user after auth initialized, redirect to login
+      window.location.href = '/auth/login';
+    }
+  }, [authLoading, user]);
 
   const fetchData = async () => {
     try {
