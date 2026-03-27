@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/store/authStore';
 
 export default function Navbar() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuth();
+  const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     router.push('/');
     window.location.reload();
   };
@@ -30,8 +32,16 @@ export default function Navbar() {
               <Link href="/send" className="text-gray-600 hover:text-blue-500">
                 Send
               </Link>
+              <Link href="/settings" className="text-gray-600 hover:text-blue-500">
+                Settings
+              </Link>
+              {user.role === 'ADMIN' ? (
+                <Link href="/admin" className="text-gray-600 hover:text-blue-500">
+                  Admin
+                </Link>
+              ) : null}
               <span className="text-gray-600">
-                {user.given_name || user.preferred_username}
+                {user.firstName || user.username}
               </span>
               <button
                 onClick={handleLogout}

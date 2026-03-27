@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -9,10 +9,18 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: user?.given_name || '',
-    lastName: user?.family_name || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
   });
+
+  useEffect(() => {
+    setFormData({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+    });
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -105,10 +113,10 @@ export default function SettingsPage() {
           <div className="card">
             <h2 className="text-2xl font-bold mb-6">Security</h2>
 
-            <button className="btn-secondary mb-4">
+            <button type="button" className="btn-secondary mb-4">
               Change Password
             </button>
-            <button className="btn-secondary">
+            <button type="button" className="btn-secondary">
               Enable Two-Factor Authentication
             </button>
           </div>
@@ -137,7 +145,7 @@ export default function SettingsPage() {
           <div className="card border border-red-200 bg-red-50">
             <h2 className="text-2xl font-bold mb-6 text-red-600">Danger Zone</h2>
 
-            <button className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+            <button type="button" className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
               Close Account
             </button>
             <p className="text-sm text-gray-600 mt-2">
