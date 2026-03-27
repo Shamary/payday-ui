@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { apiClient } from '@/lib/api';
 
-interface User {
-  sub: string;
-  preferred_username: string;
+export interface AppUser {
+  id: string;
+  username: string;
   email: string;
-  given_name?: string;
-  family_name?: string;
+  firstName?: string;
+  lastName?: string;
+  role: 'USER' | 'ADMIN';
+  accountStatus: 'active' | 'suspended' | 'closed';
 }
 
 interface Wallet {
@@ -18,11 +20,11 @@ interface Wallet {
 }
 
 interface AuthStore {
-  user: User | null;
+  user: AppUser | null;
   wallet: Wallet | null;
   loading: boolean;
   error: string | null;
-  setUser: (user: User | null) => void;
+  setUser: (user: AppUser | null) => void;
   setWallet: (wallet: Wallet | null) => void;
   logout: () => void;
   fetchUserData: () => Promise<void>;
@@ -49,6 +51,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const response = await apiClient.get('/users/me');
       set({ user: response.data });
     } catch (error: any) {
+      set({ user: null });
       set({ error: error.message });
     } finally {
       set({ loading: false });

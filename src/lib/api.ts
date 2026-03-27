@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 const apiClient = axios.create({
-  baseURL: `${BASE_URL}/api`,
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,6 +26,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+
+    // Skip token refresh for auth endpoints (login, register, etc)
+    if (isAuthEndpoint) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -33,20 +39,21 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
         if (refreshToken) {
-          const response = await axios.post(`${BASE_URL}/api/auth/refresh-token`, {
+          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
             refresh_token: refreshToken,
           });
 
           localStorage.setItem('access_token', response.data.access_token);
+          localStorage.setItem('refresh_token', response.data.refresh_token);
           originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.clear();
-          window.location.href = '/auth/login';
-        }
+      }
+
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        window.location.href = '/auth/login';
       }
     }
 

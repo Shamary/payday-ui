@@ -44,7 +44,7 @@ export default function Home() {
       ) : (
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-8">
-            Welcome back, {user.given_name || user.preferred_username}!
+            Welcome back, {user.firstName || user.username}!
           </h1>
           
           <div className="grid md:grid-cols-2 gap-8">
@@ -64,6 +64,12 @@ export default function Home() {
               <h2 className="text-2xl font-semibold mb-2">⚙️ Settings</h2>
               <p className="text-gray-600">Manage your account and preferences</p>
             </Link>
+            {user.role === 'ADMIN' ? (
+              <Link href="/admin" className="card hover:shadow-lg transition-shadow">
+                <h2 className="text-2xl font-semibold mb-2">🛠️ Admin</h2>
+                <p className="text-gray-600">Manage users, roles, and account access</p>
+              </Link>
+            ) : null}
           </div>
         </div>
       )}
