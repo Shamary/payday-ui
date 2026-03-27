@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
-import { formatAmount } from '@/lib/format';
+import { DISPLAY_CURRENCY, formatAmount } from '@/lib/format';
 
 export default function SendPage() {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function SendPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount (USDT) <span className="text-red-500">*</span>
+                Amount ({DISPLAY_CURRENCY}) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -110,18 +110,18 @@ export default function SendPage() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Amount:</span>
-                  <span className="font-medium">{formatAmount(formData.amount)} USDT</span>
+                  <span className="font-medium">{formatAmount(formData.amount)} {DISPLAY_CURRENCY}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Fee (0.01%):</span>
                   <span className="font-medium">
-                    {formatAmount(parseFloat(formData.amount || '0') * 0.0001)} USDT
+                    {formatAmount(parseFloat(formData.amount || '0') * 0.0001)} {DISPLAY_CURRENCY}
                   </span>
                 </div>
                 <div className="border-t pt-1 flex justify-between font-bold">
                   <span>Total:</span>
                   <span>
-                    {formatAmount(parseFloat(formData.amount || '0') * 1.0001)} USDT
+                    {formatAmount(parseFloat(formData.amount || '0') * 1.0001)} {DISPLAY_CURRENCY}
                   </span>
                 </div>
               </div>

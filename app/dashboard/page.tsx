@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
-import { formatAmount } from '@/lib/format';
+import { DISPLAY_CURRENCY, formatAmount } from '@/lib/format';
 
 interface Transaction {
   id: string;
@@ -19,14 +19,20 @@ interface Transaction {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [wallet, setWallet] = useState<any>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    // Wait for auth to be initialized
+    if (!authLoading && user) {
+      fetchData();
+    } else if (!authLoading && !user) {
+      // No user after auth initialized, redirect to login
+      window.location.href = '/auth/login';
+    }
+  }, [authLoading, user]);
 
   const fetchData = async () => {
     try {
@@ -66,7 +72,7 @@ export default function DashboardPage() {
         <div className="card">
           <h2 className="text-gray-600 text-sm mb-2">Wallet Balance</h2>
           <div className="text-4xl font-bold text-blue-500">
-            {formatAmount(wallet?.balance)} USDT
+            {formatAmount(wallet?.balance)} {DISPLAY_CURRENCY}
           </div>
           <p className="text-gray-500 text-sm mt-2">
             Status: <span className="capitalize font-semibold">{wallet?.status || 'N/A'}</span>
@@ -108,7 +114,7 @@ export default function DashboardPage() {
                   <tr key={tx.id} className="border-b hover:bg-gray-50">
                     <td className="py-3 capitalize text-sm">{tx.type}</td>
                     <td className="py-3 font-semibold">
-                      {tx.type === 'transfer' ? '-' : '+'} {formatAmount(tx.amount)} USDT
+                      {tx.type === 'transfer' ? '-' : '+'} {formatAmount(tx.amount)} {DISPLAY_CURRENCY}
                     </td>
                     <td className="py-3 text-sm">
                       {tx.type === 'transfer'
