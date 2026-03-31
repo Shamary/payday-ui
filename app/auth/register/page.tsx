@@ -27,9 +27,10 @@ export default function RegisterPage() {
     confirmPassword: '',
     firstName: '',
     lastName: '',
+    preferredCurrency: 'JMD',
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError(null);
@@ -54,6 +55,7 @@ export default function RegisterPage() {
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        preferredCurrency: formData.preferredCurrency,
       });
 
       router.push('/auth/login');
@@ -148,6 +150,21 @@ export default function RegisterPage() {
                 className="input-field"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Preferred Currency
+            </label>
+            <select
+              name="preferredCurrency"
+              value={formData.preferredCurrency}
+              onChange={handleChange}
+              className="input-field"
+            >
+              <option value="JMD">JMD</option>
+              <option value="USD">USD</option>
+            </select>
           </div>
 
           <div>

@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { DISPLAY_CURRENCY, formatAmount } from '@/lib/format';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function SendPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     recipientEmail: '',
     amount: '',
@@ -18,29 +21,36 @@ export default function SendPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrorMessage(null);
+    setStatusMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.recipientEmail || !formData.amount) {
-      toast.error('Please fill in all required fields');
+      setErrorMessage('Please fill in all required fields');
       return;
     }
 
     setLoading(true);
+    setErrorMessage(null);
+    setStatusMessage('Sending USDT via Privy server wallet...');
 
     try {
-      const response = await apiClient.post('/transactions/transfer', {
+      // The backend resolves the recipient wallet, sends USDT via the
+      // user's Privy server wallet on Polygon, and records the transfer.
+      await apiClient.post('/transactions/privy-transfer', {
         recipientEmail: formData.recipientEmail,
         amount: parseFloat(formData.amount),
-        note: formData.note,
+        note: formData.note || undefined,
       });
 
-      toast.success('Transfer initiated successfully!');
-      setTimeout(() => router.push('/dashboard'), 2000);
+      setStatusMessage('Transfer complete. Redirecting to dashboard...');
+      setTimeout(() => router.push('/dashboard'), 1200);
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Transfer failed');
+      setErrorMessage(error.response?.data?.error || 'Transfer failed');
+      setStatusMessage(null);
     } finally {
       setLoading(false);
     }
@@ -67,13 +77,13 @@ export default function SendPage() {
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                Enter the email address of the person you want to send money to
+                Enter the Payday account email address of the person you want to pay
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount ({DISPLAY_CURRENCY}) <span className="text-red-500">*</span>
+                Amount (USDT) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -126,6 +136,18 @@ export default function SendPage() {
                 </div>
               </div>
             </div>
+
+            {errorMessage ? (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {errorMessage}
+              </div>
+            ) : null}
+
+            {statusMessage ? (
+              <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                {statusMessage}
+              </div>
+            ) : null}
 
             <button
               type="submit"

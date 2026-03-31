@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { DISPLAY_CURRENCY, formatAmount } from '@/lib/format';
@@ -13,8 +12,8 @@ interface Transaction {
   amount: string;
   commissionAmount: string;
   status: string;
-  sender: { email: string; firstName?: string; lastName?: string };
-  receiver: { email: string; firstName?: string; lastName?: string };
+  sender: { email: string; username?: string; firstName?: string; lastName?: string };
+  receiver: { email: string; username?: string; firstName?: string; lastName?: string };
   createdAt: string;
 }
 
@@ -23,6 +22,7 @@ export default function DashboardPage() {
   const [wallet, setWallet] = useState<any>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     // Wait for auth to be initialized
@@ -48,7 +48,7 @@ export default function DashboardPage() {
       const txRes = await apiClient.get('/wallets/transactions');
       setTransactions(txRes.data);
     } catch (error: any) {
-      toast.error('Failed to fetch data');
+      setErrorMessage('Failed to fetch dashboard data');
       console.error(error);
     } finally {
       setLoading(false);
@@ -67,7 +67,13 @@ export default function DashboardPage() {
     <div className="container-custom py-8">
       <h1 className="text-4xl font-bold mb-8">Dashboard</h1>
 
-      <div className="grid md:grid-cols-3 gap-8 mb-12">
+      {errorMessage ? (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      ) : null}
+
+      <div className="grid md:grid-cols-4 gap-8 mb-12">
         {/* Wallet Balance */}
         <div className="card">
           <h2 className="text-gray-600 text-sm mb-2">Wallet Balance</h2>
@@ -88,6 +94,11 @@ export default function DashboardPage() {
         <Link href="/wallet/topup" className="card hover:shadow-lg transition-shadow cursor-pointer">
           <h2 className="text-gray-600 text-sm mb-2">💳 Add Funds</h2>
           <p className="text-lg font-semibold">Topup wallet</p>
+        </Link>
+
+        <Link href="/wallet/withdraw" className="card hover:shadow-lg transition-shadow cursor-pointer">
+          <h2 className="text-gray-600 text-sm mb-2">🏦 Withdraw</h2>
+          <p className="text-lg font-semibold">Cash out to bank</p>
         </Link>
       </div>
 
@@ -118,7 +129,7 @@ export default function DashboardPage() {
                     </td>
                     <td className="py-3 text-sm">
                       {tx.type === 'transfer'
-                        ? tx.receiver.email
+                        ? tx.receiver.username || tx.receiver.email
                         : tx.type === 'withdrawal'
                         ? 'Bank Transfer'
                         : 'Topup'}

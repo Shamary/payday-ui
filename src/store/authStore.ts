@@ -7,6 +7,8 @@ export interface AppUser {
   email: string;
   firstName?: string;
   lastName?: string;
+  preferredCurrency: 'JMD' | 'USD';
+  privyWalletAddress?: string | null;
   role: 'USER' | 'ADMIN';
   accountStatus: 'active' | 'suspended' | 'closed';
 }
@@ -14,6 +16,7 @@ export interface AppUser {
 interface Wallet {
   id: string;
   userId: string;
+  walletAddress?: string;
   balance: number;
   currency: string;
   status: string;

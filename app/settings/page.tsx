@@ -1,17 +1,19 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function SettingsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
     email: user?.email || '',
+    preferredCurrency: user?.preferredCurrency || 'JMD',
   });
 
   useEffect(() => {
@@ -19,12 +21,15 @@ export default function SettingsPage() {
       firstName: user?.firstName || '',
       lastName: user?.lastName || '',
       email: user?.email || '',
+      preferredCurrency: user?.preferredCurrency || 'JMD',
     });
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setStatusMessage(null);
+    setErrorMessage(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,11 +40,12 @@ export default function SettingsPage() {
       await apiClient.put('/users/me', {
         firstName: formData.firstName,
         lastName: formData.lastName,
+        preferredCurrency: formData.preferredCurrency,
       });
 
-      toast.success('Profile updated successfully!');
+      setStatusMessage('Profile updated successfully');
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to update profile');
+      setErrorMessage(error.response?.data?.error || 'Failed to update profile');
     } finally {
       setLoading(false);
     }
@@ -56,6 +62,18 @@ export default function SettingsPage() {
             <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {errorMessage ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              ) : null}
+
+              {statusMessage ? (
+                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                  {statusMessage}
+                </div>
+              ) : null}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -97,6 +115,21 @@ export default function SettingsPage() {
                     className="input-field"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Preferred Currency
+                </label>
+                <select
+                  name="preferredCurrency"
+                  value={formData.preferredCurrency}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  <option value="JMD">JMD</option>
+                  <option value="USD">USD</option>
+                </select>
               </div>
 
               <button

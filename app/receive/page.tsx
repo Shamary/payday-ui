@@ -17,21 +17,24 @@ export default function ReceivePage() {
             
             <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-6">
               <p className="text-gray-700 mb-4">
-                Share your email address with anyone who wants to send you money:
+                Share your username and wallet address with anyone who wants to send you money:
               </p>
-              <div className="bg-white p-4 rounded border border-gray-300 flex justify-between items-center">
-                <code className="font-mono text-lg text-blue-600">
-                  {user?.email || 'your@email.com'}
-                </code>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(user?.email || '');
-                    alert('Email copied to clipboard!');
-                  }}
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Copy
-                </button>
+              <div className="space-y-3">
+                <div className="bg-white p-4 rounded border border-gray-300 flex justify-between items-center">
+                  <code className="font-mono text-lg text-blue-600">@{user?.username || 'your_username'}</code>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(user?.username || '');
+                      alert('Username copied to clipboard!');
+                    }}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Copy
+                  </button>
+                </div>
+                <div className="bg-white p-4 rounded border border-gray-300 text-sm text-gray-700">
+                  Wallet: {user?.privyWalletAddress || 'Wallet provisioning in progress'}
+                </div>
               </div>
             </div>
 
@@ -39,9 +42,9 @@ export default function ReceivePage() {
               <div>
                 <h3 className="font-semibold text-gray-800 mb-2">How it works:</h3>
                 <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                  <li>Share your email address with the sender</li>
-                  <li>They use the Payday app to send you money</li>
-                  <li>Funds arrive in your wallet instantly</li>
+                  <li>Share your username with the sender</li>
+                  <li>Payday resolves your wallet address in the backend</li>
+                  <li>Sender signs transfer with Privy on Polygon</li>
                   <li>You can withdraw or transfer the funds anytime</li>
                 </ol>
               </div>

@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import toast from 'react-hot-toast';
 
 function GoogleCallbackContent() {
   const router = useRouter();
@@ -14,14 +13,12 @@ function GoogleCallbackContent() {
     const error = searchParams.get('error');
 
     if (error || !accessToken || !refreshToken) {
-      toast.error('Google sign-in failed');
-      router.replace('/auth/login');
+      router.replace('/auth/login?error=google-auth-failed');
       return;
     }
 
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
-    toast.success('Signed in with Google');
     router.replace('/dashboard');
   }, [router, searchParams]);
 
