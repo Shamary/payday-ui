@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
-import { openPaybisWidget } from '@/lib/paybis';
+import { openMtPelerinWidget } from '@/lib/mtpelerin';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function TopupPage() {
@@ -35,20 +35,20 @@ export default function TopupPage() {
     }
 
     setLoading(true);
-    setStatusMessage('Creating Paybis checkout...');
+    setStatusMessage('Creating Mt Pelerin checkout...');
     setErrorMessage(null);
 
     try {
-      // Ask the backend to create the Paybis request so checkout opens with
+      // Ask the backend to create the Mt Pelerin request so checkout opens with
       // the wallet address and amount already pre-filled for this user.
-      const response = await apiClient.post('/wallets/paybis/request', {
+      const response = await apiClient.post('/wallets/mtpelerin/request', {
         amountFiat: Number(formData.amount),
         fiatCurrency: user.preferredCurrency,
       });
 
-      openPaybisWidget(response.data.widgetUrl);
+      openMtPelerinWidget(response.data.widgetUrl);
       setStatusMessage(
-        `Paybis opened. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDT directly into your app wallet.`
+        `Mt Pelerin opened. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDT directly into your app wallet.`
       );
     } catch (error: any) {
       setErrorMessage(error.response?.data?.error || 'Topup failed');
@@ -87,7 +87,7 @@ export default function TopupPage() {
 
             <div>
               <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-                Paybis will open with your Privy wallet address pre-filled so you can complete checkout without copying any crypto addresses.
+                Mt Pelerin will open with your Privy wallet address pre-filled so you can complete checkout without copying any crypto addresses.
               </p>
             </div>
 
@@ -107,10 +107,10 @@ export default function TopupPage() {
               <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
               <ol className="list-decimal list-inside space-y-1 text-sm text-blue-800">
                 <li>Enter the amount you want to add</li>
-                <li>We create a Paybis request for your wallet</li>
-                <li>Complete the Paybis checkout and any required KYC</li>
+                <li>We create an Mt Pelerin request for your wallet</li>
+                <li>Complete the Mt Pelerin checkout and any required KYC</li>
                 <li>USDT is sent directly to your Privy wallet on Polygon</li>
-                <li>Your balance updates after the Paybis webhook is confirmed</li>
+                <li>Your balance updates after the Mt Pelerin webhook is confirmed</li>
               </ol>
             </div>
 
@@ -135,7 +135,7 @@ export default function TopupPage() {
               disabled={loading}
               className="w-full btn-primary disabled:opacity-50 text-lg py-3"
             >
-              {loading ? 'Preparing checkout...' : 'Launch Paybis'}
+              {loading ? 'Preparing checkout...' : 'Launch Mt Pelerin'}
             </button>
           </form>
         </div>
@@ -144,7 +144,7 @@ export default function TopupPage() {
           <h3 className="font-semibold mb-3">On-Ramp flow:</h3>
           <div className="space-y-2 text-sm text-gray-600">
             <p>• Amount is collected in your profile currency ({user?.preferredCurrency || 'JMD'})</p>
-            <p>• Paybis handles checkout + KYC</p>
+            <p>• Mt Pelerin handles checkout + KYC</p>
             <p>• USDT is delivered to your Privy wallet on Polygon</p>
           </div>
         </div>
