@@ -9,14 +9,14 @@ export interface PrivyTransferInput {
  *
  * The backend looks up the user's Privy server wallet (provisioned at
  * registration via the Privy Server Wallets API), builds the USDT ERC-20
- * transfer calldata for the Mt Pelerin deposit address, and submits the
+ * transfer calldata for the Coinbase destination flow, and submits the
  * transaction to Polygon via Privy's eth_sendTransaction RPC endpoint:
  *
  *   POST /v1/wallets/{walletId}/rpc
  *   { "method": "eth_sendTransaction", "caip2": "eip155:137", ... }
  *
  * The on-chain tx hash is returned and stored on the Withdrawal record so
- * Mt Pelerin can reconcile the incoming USDT against the off-ramp request.
+ * Coinbase can reconcile the incoming USDT against the off-ramp request.
  *
  * Gas for the Polygon transaction is covered by the Privy wallet's MATIC
  * balance. A paymaster/gas-sponsorship policy can be configured in the
@@ -27,7 +27,7 @@ export async function signAndSendPrivyTransfer(input: PrivyTransferInput): Promi
     throw new Error('withdrawalId is required to initiate Privy transfer');
   }
 
-  const response = await apiClient.post('/wallets/mtpelerin/payout-initiate-transfer', {
+  const response = await apiClient.post('/wallets/coinbase/payout-initiate-transfer', {
     withdrawalId: input.withdrawalId,
   });
 

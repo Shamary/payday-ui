@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
-import { openMtPelerinWidget } from '@/lib/mtpelerin';
-import { signAndSendPrivyTransfer } from '@/lib/privy';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function WithdrawPage() {
@@ -43,47 +41,32 @@ export default function WithdrawPage() {
     setErrorMessage(null);
 
     let withdrawalId: string | null = null;
-    let mtPelerinRequestId: string | null = null;
+    let providerRequestId: string | null = null;
 
     try {
-      // Step 1: create an Mt Pelerin sell-crypto request. The backend stores
-      // the deposit address and returns a withdrawalId to track the flow.
-      setStatusMessage('Creating Mt Pelerin payout request...');
-      const sessionResponse = await apiClient.post('/wallets/mtpelerin/payout-request', {
+      // Step 1: Create a Coinbase off-ramp request. The backend initializes
+      // the withdrawal with debited balance and returns a URL.
+      setStatusMessage('Creating Coinbase payout request...');
+      const sessionResponse = await apiClient.post('/wallets/coinbase/payout-request', {
         amountUSDT: Number(formData.amountUSDT),
         destinationCardLast4: formData.destinationCardLast4,
       });
 
       const createdSession = sessionResponse.data as {
         withdrawalId: string;
-        mtPelerinRequestId: string;
-        depositAddress: string;
+        providerRequestId: string;
+        offrampUrl: string;
         amountUSDT: number;
-        widgetUrl: string;
+        payoutCurrency: string;
+        status: string;
       };
       withdrawalId = createdSession.withdrawalId;
-      mtPelerinRequestId = createdSession.mtPelerinRequestId;
-      openMtPelerinWidget(createdSession.widgetUrl);
+      providerRequestId = createdSession.providerRequestId;
 
-      // Step 2: the backend uses the user's Privy server wallet to send USDT
-      // on Polygon to the Mt Pelerin deposit address. All signing happens
-      // server-side via the Privy Server Wallets API (eth_sendTransaction).
-      setStatusMessage('Sending USDT via Privy server wallet...');
-      await signAndSendPrivyTransfer({ withdrawalId: createdSession.withdrawalId });
-
-      setStatusMessage('Withdrawal submitted. Mt Pelerin will complete the fiat payout via webhook. Redirecting...');
-      setTimeout(() => router.push('/dashboard'), 1200);
+      // Redirect to Coinbase hosted off-ramp URL
+      window.location.href = createdSession.offrampUrl;
+      setStatusMessage('Redirecting to Coinbase. Complete your withdrawal...');
     } catch (error: any) {
-      // If the Privy transfer already started but something else failed,
-      // record the failure so it can be investigated.
-      if (withdrawalId && mtPelerinRequestId) {
-        await apiClient.post('/wallets/mtpelerin/payout-transfer-failed', {
-          withdrawalId,
-          mtPelerinRequestId,
-          failureReason: error?.message || error?.response?.data?.error || 'Transfer failed',
-        }).catch(() => undefined);
-      }
-
       setErrorMessage(error.response?.data?.error || error?.message || 'Withdrawal flow failed');
       setStatusMessage(null);
     } finally {
@@ -133,7 +116,7 @@ export default function WithdrawPage() {
             </div>
 
             <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-              Mt Pelerin will provide a deposit address. Your Privy server wallet will send USDT on Polygon to that address, and Mt Pelerin will complete the fiat payout after blockchain confirmation.
+              Coinbase will open a hosted off-ramp flow where you can complete your withdrawal securely. Your balance is debited immediately and the fiat will be sent to your destination after completion.
             </p>
 
             {errorMessage ? (
