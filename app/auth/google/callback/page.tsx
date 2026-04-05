@@ -2,24 +2,45 @@
 
 import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { apiClient } from '@/lib/api';
+import { getPostAuthRedirectPath, storeAuthTokens } from '@/lib/auth';
 
 function GoogleCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const error = searchParams.get('error');
+    let cancelled = false;
 
-    if (error || !accessToken || !refreshToken) {
-      router.replace('/auth/login?error=google-auth-failed');
-      return;
-    }
+    const finalizeSignIn = async () => {
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const error = searchParams.get('error');
 
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshToken);
-    router.replace('/dashboard');
+      if (error || !accessToken || !refreshToken) {
+        router.replace('/auth/login?error=google-auth-failed');
+        return;
+      }
+
+      storeAuthTokens(accessToken, refreshToken);
+
+      try {
+        const response = await apiClient.get('/users/me');
+        if (!cancelled) {
+          router.replace(getPostAuthRedirectPath(response.data));
+        }
+      } catch {
+        if (!cancelled) {
+          router.replace('/auth/login?error=google-auth-failed');
+        }
+      }
+    };
+
+    void finalizeSignIn();
+
+    return () => {
+      cancelled = true;
+    };
   }, [router, searchParams]);
 
   return (

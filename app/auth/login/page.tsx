@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL, apiClient } from '@/lib/api';
+import { getPostAuthRedirectPath, storeAuthTokens } from '@/lib/auth';
 
 function GoogleIcon() {
   return (
@@ -38,11 +39,9 @@ export default function LoginPage() {
 
     try {
       const response = await apiClient.post('/auth/login', formData);
-      
-      localStorage.setItem('access_token', response.data.access_token);
-      localStorage.setItem('refresh_token', response.data.refresh_token);
-      
-      router.push('/dashboard');
+
+      storeAuthTokens(response.data.access_token, response.data.refresh_token);
+      router.push(getPostAuthRedirectPath(response.data.user));
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Login failed';
       setError(errorMessage);

@@ -48,7 +48,7 @@ export default function TopupPage() {
       // Redirect to Coinbase hosted on-ramp URL
       window.location.href = response.data.onRampUrl;
       setStatusMessage(
-        `Redirecting to Coinbase. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDT directly into your app wallet.`
+        `Redirecting to Coinbase. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDC directly into your app wallet.`
       );
     } catch (error: any) {
       setErrorMessage(error.response?.data?.error || 'Topup failed');
@@ -87,7 +87,7 @@ export default function TopupPage() {
 
             <div>
               <p className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
-                Coinbase will open with your Privy wallet address pre-filled so you can complete checkout without copying any crypto addresses.
+                Coinbase will open with your Coinbase embedded wallet address pre-filled so you can complete checkout without copying any crypto addresses.
               </p>
             </div>
 
@@ -109,7 +109,7 @@ export default function TopupPage() {
                 <li>Enter the amount you want to add</li>
                 <li>We create a Coinbase checkout request for your wallet</li>
                 <li>Complete the Coinbase checkout and any required KYC</li>
-                <li>USDT is sent directly to your Privy wallet on Polygon</li>
+                <li>USDC is sent directly to your Coinbase embedded wallet on Base</li>
                 <li>Your balance updates after the Coinbase webhook is confirmed</li>
               </ol>
             </div>
@@ -145,7 +145,7 @@ export default function TopupPage() {
           <div className="space-y-2 text-sm text-gray-600">
             <p>• Amount is collected in your profile currency ({user?.preferredCurrency || 'JMD'})</p>
             <p>• Coinbase handles checkout + KYC</p>
-            <p>• USDT is delivered to your Privy wallet on Polygon</p>
+            <p>• USDC is delivered to your Coinbase embedded wallet on Base</p>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-export const DISPLAY_CURRENCY = 'USDT';
+export const DISPLAY_CURRENCY = 'USDC';
 
 export function formatAmount(value: number | string | null | undefined, decimals = 2): string {
   const numeric = Number(value ?? 0);

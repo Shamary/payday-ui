@@ -13,7 +13,7 @@ export default function WithdrawPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
-    amountUSDT: '',
+    amountUSDC: '',
     destinationCardLast4: '',
   });
 
@@ -27,7 +27,7 @@ export default function WithdrawPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.amountUSDT || !formData.destinationCardLast4) {
+    if (!formData.amountUSDC || !formData.destinationCardLast4) {
       setErrorMessage('Amount and destination card last 4 are required');
       return;
     }
@@ -48,7 +48,7 @@ export default function WithdrawPage() {
       // the withdrawal with debited balance and returns a URL.
       setStatusMessage('Creating Coinbase payout request...');
       const sessionResponse = await apiClient.post('/wallets/coinbase/payout-request', {
-        amountUSDT: Number(formData.amountUSDT),
+        amountUSDC: Number(formData.amountUSDC),
         destinationCardLast4: formData.destinationCardLast4,
       });
 
@@ -56,7 +56,7 @@ export default function WithdrawPage() {
         withdrawalId: string;
         providerRequestId: string;
         offrampUrl: string;
-        amountUSDT: number;
+        amountUSDC: number;
         payoutCurrency: string;
         status: string;
       };
@@ -83,12 +83,12 @@ export default function WithdrawPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label className="mb-2 block text-sm font-medium text-gray-700">
-                Amount (USDT) <span className="text-red-500">*</span>
+                Amount (USDC) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
-                name="amountUSDT"
-                value={formData.amountUSDT}
+                name="amountUSDC"
+                value={formData.amountUSDC}
                 onChange={handleChange}
                 placeholder="125.50"
                 step="0.01"

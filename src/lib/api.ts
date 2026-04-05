@@ -27,6 +27,8 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
     const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+    const accessToken = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
 
     // Skip token refresh for auth endpoints (login, register, etc)
     if (isAuthEndpoint) {
@@ -34,20 +36,21 @@ apiClient.interceptors.response.use(
     }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (!accessToken || !refreshToken) {
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       try {
-        const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refresh_token') : null;
-        if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
-            refresh_token: refreshToken,
-          });
+        const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
+          refresh_token: refreshToken,
+        });
 
-          localStorage.setItem('access_token', response.data.access_token);
-          localStorage.setItem('refresh_token', response.data.refresh_token);
-          originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
-          return apiClient(originalRequest);
-        }
+        localStorage.setItem('access_token', response.data.access_token);
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+        originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
+        return apiClient(originalRequest);
       } catch (refreshError) {
       }
 

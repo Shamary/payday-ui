@@ -15,7 +15,7 @@
     "noImplicitAny": true,
     "resolveJsonModule": true,
     /* Next.js specific */
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,

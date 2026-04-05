@@ -13,7 +13,8 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!isLoading) {
-      const isPublicRoute = publicRoutes.includes(pathname);
+      const isWalletSetupRoute = pathname.startsWith('/auth/wallet-setup');
+      const isPublicRoute = isWalletSetupRoute || publicRoutes.includes(pathname);
 
       if (!isAuthenticated && !isPublicRoute) {
         router.push('/auth/login');

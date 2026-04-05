@@ -35,12 +35,12 @@ export default function SendPage() {
 
     setLoading(true);
     setErrorMessage(null);
-    setStatusMessage('Sending USDT via Privy server wallet...');
+    setStatusMessage('Sending USDC via Coinbase embedded wallet...');
 
     try {
-      // The backend resolves the recipient wallet, sends USDT via the
-      // user's Privy server wallet on Polygon, and records the transfer.
-      await apiClient.post('/transactions/privy-transfer', {
+      // The backend resolves the recipient wallet, sends USDC via the
+      // user's Coinbase embedded wallet on Base, and records the transfer.
+      await apiClient.post('/transactions/coinbase-wallet-transfer', {
         recipientEmail: formData.recipientEmail,
         amount: parseFloat(formData.amount),
         note: formData.note || undefined,
@@ -83,7 +83,7 @@ export default function SendPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Amount (USDT) <span className="text-red-500">*</span>
+                Amount (USDC) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"

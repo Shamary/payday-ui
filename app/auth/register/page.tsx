@@ -4,6 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { API_BASE_URL, apiClient } from '@/lib/api';
+import { getPostAuthRedirectPath, storeAuthTokens, storePendingSignup } from '@/lib/auth';
+
+const COINBASE_PROJECT_ID = process.env.NEXT_PUBLIC_CDP_PROJECT_ID || '';
 
 function GoogleIcon() {
   return (
@@ -49,6 +52,19 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      if (COINBASE_PROJECT_ID) {
+        storePendingSignup({
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          preferredCurrency: formData.preferredCurrency as 'JMD' | 'USD',
+        });
+        router.push('/auth/wallet-setup?mode=signup');
+        return;
+      }
+
       await apiClient.post('/auth/register', {
         email: formData.email,
         username: formData.username,
@@ -58,7 +74,13 @@ export default function RegisterPage() {
         preferredCurrency: formData.preferredCurrency,
       });
 
-      router.push('/auth/login');
+      const loginResponse = await apiClient.post('/auth/login', {
+        username: formData.email,
+        password: formData.password,
+      });
+
+      storeAuthTokens(loginResponse.data.access_token, loginResponse.data.refresh_token);
+      router.push(getPostAuthRedirectPath(loginResponse.data.user));
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Registration failed';
       setError(errorMessage);
@@ -75,6 +97,12 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="card max-w-md w-full">
         <h1 className="text-3xl font-bold mb-6 text-center">Create Account</h1>
+
+        {COINBASE_PROJECT_ID ? (
+          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+            After you submit this form, Coinbase email verification starts immediately and your Payday account is created after wallet setup completes.
+          </div>
+        ) : null}
 
         <button
           type="button"
@@ -200,7 +228,7 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full btn-primary disabled:opacity-50"
           >
-            {loading ? 'Creating account...' : 'Create Account'}
+            {loading ? 'Continuing...' : COINBASE_PROJECT_ID ? 'Continue to Coinbase Verification' : 'Create Account'}
           </button>
         </form>
 

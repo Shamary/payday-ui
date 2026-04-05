@@ -33,7 +33,7 @@ export default function ReceivePage() {
                   </button>
                 </div>
                 <div className="bg-white p-4 rounded border border-gray-300 text-sm text-gray-700">
-                  Wallet: {user?.privyWalletAddress || 'Wallet provisioning in progress'}
+                  Wallet: {user?.coinbaseWalletAddress || 'Wallet provisioning in progress'}
                 </div>
               </div>
             </div>
@@ -44,7 +44,7 @@ export default function ReceivePage() {
                 <ol className="list-decimal list-inside space-y-2 text-gray-700">
                   <li>Share your username with the sender</li>
                   <li>Payday resolves your wallet address in the backend</li>
-                  <li>Sender signs transfer with Privy on Polygon</li>
+                  <li>Sender signs transfer with Coinbase on Base</li>
                   <li>You can withdraw or transfer the funds anytime</li>
                 </ol>
               </div>

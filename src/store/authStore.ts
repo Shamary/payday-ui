@@ -8,7 +8,8 @@ export interface AppUser {
   firstName?: string;
   lastName?: string;
   preferredCurrency: 'JMD' | 'USD';
-  privyWalletAddress?: string | null;
+  coinbaseWalletAddress?: string | null;
+  coinbaseWalletId?: string | null;
   role: 'USER' | 'ADMIN';
   accountStatus: 'active' | 'suspended' | 'closed';
 }
