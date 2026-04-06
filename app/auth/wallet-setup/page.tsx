@@ -8,6 +8,7 @@ import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { clearPendingSignup, getPendingSignup, storeAuthTokens } from '@/lib/auth';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 const COINBASE_PROJECT_ID = process.env.NEXT_PUBLIC_CDP_PROJECT_ID || '';
 
@@ -225,9 +226,13 @@ function WalletSetupFlow() {
       }
 
       setWalletLinked(true);
-      setStatusMessage('Wallet linked successfully. Redirecting to your dashboard...');
+      setStatusMessage('Wallet linked successfully. Redirecting to one-time security verification...');
       toast.success('Account created');
-      router.replace('/dashboard');
+      if (isSignupMode) {
+        router.replace('/auth/coinbase-verification?mode=signup');
+      } else {
+        router.replace('/auth/coinbase-verification');
+      }
     } catch (error: any) {
       const message = error.response?.data?.error || error.message || 'Failed to finalize wallet setup';
       setErrorMessage(message);
@@ -318,6 +323,16 @@ function WalletSetupFlow() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+      <LoadingOverlay
+        visible={isSendingCode || isVerifyingCode || linkingWallet}
+        message={
+          linkingWallet
+            ? 'Linking your Coinbase wallet...'
+            : isVerifyingCode
+            ? 'Verifying code and creating wallet...'
+            : 'Sending verification code...'
+        }
+      />
       <div className="card w-full max-w-lg">
         <h1 className="mb-3 text-3xl font-bold text-center">Finish Wallet Setup</h1>
         <p className="mb-6 text-center text-gray-600">

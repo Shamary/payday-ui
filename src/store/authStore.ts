@@ -10,6 +10,8 @@ export interface AppUser {
   preferredCurrency: 'JMD' | 'USD';
   coinbaseWalletAddress?: string | null;
   coinbaseWalletId?: string | null;
+  coinbaseVerified: boolean;
+  coinbaseVerifiedAt?: string | null;
   role: 'USER' | 'ADMIN';
   accountStatus: 'active' | 'suspended' | 'closed';
 }

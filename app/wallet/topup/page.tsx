@@ -1,17 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { openCoinbaseWidget } from '@/lib/coinbase';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function TopupPage() {
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     amount: '',
   });
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (user && !user.coinbaseVerified) {
+      router.replace('/auth/coinbase-verification?next=%2Fwallet%2Ftopup');
+    }
+  }, [isLoading, router, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -45,10 +59,9 @@ export default function TopupPage() {
         fiatCurrency: user.preferredCurrency,
       });
 
-      // Redirect to Coinbase hosted on-ramp URL
-      window.location.href = response.data.onRampUrl;
+      openCoinbaseWidget(response.data.onRampUrl);
       setStatusMessage(
-        `Redirecting to Coinbase. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDC directly into your app wallet.`
+        `Coinbase modal opened. Complete checkout to buy ${formData.amount} ${user.preferredCurrency} of USDC directly into your app wallet.`
       );
     } catch (error: any) {
       setErrorMessage(error.response?.data?.error || 'Topup failed');
@@ -60,6 +73,7 @@ export default function TopupPage() {
 
   return (
     <div className="container-custom py-8">
+      <LoadingOverlay visible={loading} message="Preparing secure Coinbase checkout..." />
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Add Funds to Wallet</h1>
 

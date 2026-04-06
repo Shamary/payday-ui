@@ -50,10 +50,21 @@ export function clearPendingSignup() {
   sessionStorage.removeItem(PENDING_SIGNUP_KEY);
 }
 
-export function getPostAuthRedirectPath(user?: { coinbaseWalletAddress?: string | null }) {
+export function getPostAuthRedirectPath(user?: {
+  coinbaseWalletAddress?: string | null;
+  coinbaseVerified?: boolean;
+}) {
   if (!COINBASE_PROJECT_ID) {
     return '/dashboard';
   }
 
-  return user?.coinbaseWalletAddress ? '/dashboard' : '/auth/wallet-setup';
+  if (!user?.coinbaseWalletAddress) {
+    return '/auth/wallet-setup';
+  }
+
+  if (!user.coinbaseVerified) {
+    return '/auth/coinbase-verification';
+  }
+
+  return '/dashboard';
 }

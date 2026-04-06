@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { DISPLAY_CURRENCY, formatAmount } from '@/lib/format';
 import { useAuth } from '@/hooks/useAuth';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function SendPage() {
   const router = useRouter();
@@ -58,6 +59,7 @@ export default function SendPage() {
 
   return (
     <div className="container-custom py-8">
+      <LoadingOverlay visible={loading} message="Processing transfer on Base..." />
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Send Money</h1>
 

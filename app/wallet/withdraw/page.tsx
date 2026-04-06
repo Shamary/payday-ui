@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import { openCoinbaseWidget } from '@/lib/coinbase';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function WithdrawPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -16,6 +18,16 @@ export default function WithdrawPage() {
     amountUSDC: '',
     destinationCardLast4: '',
   });
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    if (user && !user.coinbaseVerified) {
+      router.replace('/auth/coinbase-verification?next=%2Fwallet%2Fwithdraw');
+    }
+  }, [isLoading, router, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,9 +75,8 @@ export default function WithdrawPage() {
       withdrawalId = createdSession.withdrawalId;
       providerRequestId = createdSession.providerRequestId;
 
-      // Redirect to Coinbase hosted off-ramp URL
-      window.location.href = createdSession.offrampUrl;
-      setStatusMessage('Redirecting to Coinbase. Complete your withdrawal...');
+      openCoinbaseWidget(createdSession.offrampUrl);
+      setStatusMessage('Coinbase modal opened. Complete your withdrawal securely.');
     } catch (error: any) {
       setErrorMessage(error.response?.data?.error || error?.message || 'Withdrawal flow failed');
       setStatusMessage(null);
@@ -76,6 +87,7 @@ export default function WithdrawPage() {
 
   return (
     <div className="container-custom py-8">
+      <LoadingOverlay visible={loading} message="Preparing secure Coinbase payout..." />
       <div className="mx-auto max-w-2xl">
         <h1 className="mb-8 text-4xl font-bold">Withdraw to Bank</h1>
 

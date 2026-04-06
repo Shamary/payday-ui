@@ -3,6 +3,7 @@
 import { ReactNode, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { getPostAuthRedirectPath } from '@/lib/auth';
 
 const publicRoutes = ['/', '/auth/login', '/auth/register', '/auth/google/callback'];
 
@@ -14,14 +15,21 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
       const isWalletSetupRoute = pathname.startsWith('/auth/wallet-setup');
-      const isPublicRoute = isWalletSetupRoute || publicRoutes.includes(pathname);
+      const isVerificationRoute = pathname.startsWith('/auth/coinbase-verification');
+      const isPublicRoute = isWalletSetupRoute || isVerificationRoute || publicRoutes.includes(pathname);
 
       if (!isAuthenticated && !isPublicRoute) {
         router.push('/auth/login');
       } else if (isAuthenticated && (pathname === '/auth/login' || pathname === '/auth/register')) {
-        router.push('/dashboard');
+        router.push(getPostAuthRedirectPath(user || undefined));
       } else if (pathname.startsWith('/admin') && user?.role !== 'ADMIN') {
         router.push('/dashboard');
+      } else if (
+        isAuthenticated &&
+        !user?.coinbaseVerified &&
+        (pathname.startsWith('/wallet/topup') || pathname.startsWith('/wallet/withdraw'))
+      ) {
+        router.push(`/auth/coinbase-verification?next=${encodeURIComponent(pathname)}`);
       }
     }
   }, [isAuthenticated, isLoading, pathname, router, user]);

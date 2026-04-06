@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import type { AppUser } from '@/store/authStore';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 type ManagedUser = AppUser & {
   phoneNumber?: string;
@@ -156,6 +157,10 @@ export default function AdminPage() {
 
   return (
     <div className="container-custom py-8">
+      <LoadingOverlay
+        visible={loadingUsers || saving}
+        message={saving ? 'Saving user changes...' : 'Loading admin data...'}
+      />
       <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-4xl font-bold text-gray-900">Admin</h1>

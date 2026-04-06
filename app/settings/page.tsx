@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
+import LoadingOverlay from '@/components/ui/LoadingOverlay';
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -53,10 +55,33 @@ export default function SettingsPage() {
 
   return (
     <div className="container-custom py-8">
+      <LoadingOverlay visible={loading} message="Saving your settings..." />
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold mb-8">Settings</h1>
 
         <div className="space-y-6">
+          <div className="card">
+            <h2 className="text-2xl font-bold mb-4">Coinbase Verification</h2>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <p className="text-sm text-gray-700">
+                Status:{' '}
+                <span className={user?.coinbaseVerified ? 'font-semibold text-green-700' : 'font-semibold text-amber-700'}>
+                  {user?.coinbaseVerified ? 'Verified' : 'Unverified'}
+                </span>
+              </p>
+              <p className="mt-2 text-sm text-gray-600">
+                Complete one-time Coinbase verification to enable instant Visa/Mastercard purchases and withdrawals.
+              </p>
+            </div>
+
+            {!user?.coinbaseVerified ? (
+              <Link href="/auth/coinbase-verification?next=%2Fsettings" className="inline-block mt-4 btn-primary">
+                Complete verification
+              </Link>
+            ) : null}
+          </div>
+
           {/* Profile Settings */}
           <div className="card">
             <h2 className="text-2xl font-bold mb-6">Profile Settings</h2>
